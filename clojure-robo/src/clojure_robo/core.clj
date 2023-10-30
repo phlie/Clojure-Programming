@@ -112,68 +112,82 @@
 
 
 
-(defn recursive-dls
+;; (defn recursive-dls
+;;   "Returns a solution or faliure / cutoff"
+;;   [board node limit results]
+;;   (if (<= limit 0)
+;;     node
+;;     (doseq [[x y] [[1 0] [-1 0] [0 1] [0 -1]]]
+;;       (let [row (+ x ((comp first last) node))
+;;             col (+ y ((comp second last) node))]
+;;         (if (some #(= [row col] %) node)
+;;           node
+;;           (let [cell (check-close-cells board [row col])]
+;;             (if (= cell "GOAL")
+;;               (do (def goal-path (conj node [row col]))
+;;                   (conj results (conj node [row col])))
+;;               (if (= cell "X")
+;;                 (conj results nil)
+;;                 (recursive-dls board (conj node [row col]) (dec limit) results))))))))
+;;   results)
+
+;; (defn first-improved-rdls
+;;   []
+;;   "Should be redefined.")
+
+;; (defn helper-function
+;;   [board nodes limit results x y pos]
+;;   ;; (println "Nodes:" nodes)
+;;   ;; (println x y)
+;;   (let [row (+ x (first pos))
+;;         col (+ y (second pos))]
+;;     (if (some #(= [row col] %) nodes)
+;;       (conj nodes [row col])
+;;       (let [cell (check-close-cells board [row col])]
+;;         (if (= cell "GOAL")
+;;           (do (def goal-path (conj results [row col "GOAL"]))
+;;               (conj nodes [row col]) )
+;;           (if (= cell "X")
+;;             (conj nodes [row col])
+;;             (do
+;;               (first-improved-rdls board (conj nodes [row col]) (dec limit) results))))))))
+
+
+
+(defn improved-rdls
   "Returns a solution or faliure / cutoff"
-  [board node limit results]
-  (if (<= limit 0)
-    node
-    (doseq [[x y] [[1 0] [-1 0] [0 1] [0 -1]]]
-      (let [row (+ x ((comp first last) node))
-            col (+ y ((comp second last) node))]
-        (if (some #(= [row col] %) node)
-          node
-          (let [cell (check-close-cells board [row col])]
-            (if (= cell "GOAL")
-              (do (def goal-path (conj node [row col]))
-                  (conj results (conj node [row col])))
-              (if (= cell "X")
-                (conj results nil)
-                (recursive-dls board (conj node [row col]) (dec limit) results))))))))
-  results)
+  ([board node limit results]
+   (let [pos (last node)]
+     (if (= "GOAL" (last node))
+       node
+       (if (<= limit 0)
+         node
+         (let [node-0 (improved-rdls board node limit (conj results pos) 0 1 pos)]
+           (if (= (last node-0) "GOAL")
+             node-0
+             (let [node-1 (improved-rdls board node-0 limit (conj results pos) 0 -1 pos)]
+               (if (= (last node-1) "GOAL")
+                 node-1
+                 (let [node-2 (improved-rdls board node-1 limit (conj results pos) 1 0 pos)]
+                   (if (= (last node-1) "GOAL")
+                     node-2
+                     (let [node-3 (improved-rdls board node-2 limit (conj results pos) -1 0 pos)]
+                       (if (= (last node-3) "GOAL")
+                         node-3
+                         node-3))))))))))))
 
-(defn helper-function
-  [board nodes limit results x y pos]
-  ;; (println "Nodes:" nodes)
-  ;; (println x y)
-  (let [row (+ x (first pos))
-        col (+ y (second pos))]
-    (if (some #(= [row col] %) nodes)
-      (conj nodes [row col])
-      (let [cell (check-close-cells board [row col])]
-        (if (= cell "GOAL")
-          (do (def goal-path (conj results [row col "GOAL"]))
-              (conj nodes [row col]) )
-          (if (= cell "X")
-            (conj nodes [row col])
-            (do
-              (first-improved-rdls board (conj nodes [row col]) (dec limit) results))))))))
-
-_0_
-_1_
-_Y_
-
-(defn first-improved-rdls
-  "Returns a solution or faliure / cutoff"
-  [board node limit results]
-  (let [pos (last node)]
-    (if (= "GOAL" (last node))
-      node
-      (if (<= limit 0)
-        node
-        (let [node-0 (helper-function board node limit (conj results pos) 0 1 pos)]
-          (if (= (last node-0) "GOAL")
-            node-0
-            (let [node-1 (helper-function board node-0 limit (conj results pos) 0 -1 pos)]
-              (if (= (last node-1) "GOAL")
-                node-1
-                (let [node-2 (helper-function board node-1 limit (conj results pos) 1 0 pos)]
-                  (if (= (last node-1) "GOAL")
-                    node-2
-                    (let [node-3 (helper-function board node-2 limit (conj results pos) -1 0 pos)]
-                      (if (= (last node-3) "GOAL")
-                        node-3
-                        node-3))))))))))))
-
+  ([board nodes limit results x y pos]
+   (let [row (+ x (first pos))
+         col (+ y (second pos))]
+     (if (some #(= [row col] %) nodes)
+       (conj nodes [row col])
+       (let [cell (check-close-cells board [row col])]
+         (if (= cell "GOAL")
+           (do (def goal-path (conj results [row col "GOAL"]))
+               (conj nodes [row col]) )
+           (if (= cell "X")
+             (conj nodes [row col])
+             (improved-rdls board (conj nodes [row col]) (dec limit) results))))))))
 
 (defn depth-limiting-search
   [board robot-position limit]
@@ -181,6 +195,6 @@ _Y_
   (dotimes [x limit]
     (println "Current Limit: " x)
     (when (empty? goal-path)
-      (first-improved-rdls board robot-position x '())))
+      (improved-rdls board robot-position x '())))
   (println goal-path)
-  goal-path)
+  (reverse goal-path))

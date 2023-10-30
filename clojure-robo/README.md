@@ -18,9 +18,9 @@ FIXME: listing of options this app accepts.
 
 ## Examples
 
-...
-
-### Bugs
+1. Load the whole `core.clj` file into the REPL.
+2. Create a board with `(def board-name (create-board 25))` where `25` can be any resonable int.
+3. Final, run the algorithm with `(depth-limiting-search board-name [[0 0]] 50)` where [0 0] is the Column and Row to start in and 50 is its maximum depth.
 
 ...
 
@@ -30,15 +30,4 @@ FIXME: listing of options this app accepts.
 
 ## License
 
-Copyright © 2023 FIXME
-
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
-
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+Copyright © 2023 Matt Stein
